@@ -24,6 +24,12 @@
     - [Método 1: SLAAC](#método-1-slaac)
     - [Método 2: SLAAC y DHCPv6 sin estado](#método-2-slaac-y-dhcpv6-sin-estado)
     - [Método 3: DHCPv6 con estado (sin SLAAC)](#método-3-dhcpv6-con-estado-sin-slaac)
+    - [Proceso EUI-64](#proceso-eui-64)
+    - [ID de interfaz generados aleatoriamente](#id-de-interfaz-generados-aleatoriamente)
+  - [Direccionamiento dinámico para LLA IPv6](#direccionamiento-dinámico-para-lla-ipv6)
+    - [LLA dinámicos](#lla-dinámicos)
+  - [Direcciones Multicast de IPv6](#direcciones-multicast-de-ipv6)
+    - [Direcciones IPv6 de multidifusión asignadas](#direcciones-ipv6-de-multidifusión-asignadas)
 
 - - -
 
@@ -221,7 +227,7 @@ Se podría configurar exactamente la misma **LLA** en cada enlace, siempre que s
 
 ### Mensajes RS y RA
 
-**Mensajes de anuncio de enrutador (RA)**. <br>
+**Mensajes de anuncio de enrutador (RA)**.<br>
 **Mensajes de solicitud de enrutador (RS)**.
 
 Para el **GUA**, un dispositivo obtiene la dirección dinámicamente a través de mensajes del *Protocolo* de mensajes de control de Internet versión 6 (ICMPv6).
@@ -246,6 +252,86 @@ Existen tres métodos para los mensajes **RA**:
 
 ### Método 1: SLAAC
 
+**SLAAC** es un Método que permite a un dispositivo, crear su propio **GUA** sin los servicios de **DHCPv6**.
+
+Usando **SLAAC** los dispositivos confían en los mensajes **ICMPv6 RA** del Router local para obtener la información necesaria. El dispositivo cliente, usa la información en el mensaje **RA** para crear su propia **GUA**.
+
+**SLAAC** no tiene estado, lo que significa que no hay un servidor central (por ejemplo, un servidor DHCPv6 con estado) que asigne **GUA** y mantenga una lista de dispositivos y sus direcciones.
+
+- *Prefijo*. Se anuncia en el mensaje Ra.
+- *ID de interfaz*. Utiliza el proceso EUI-64 o genera un número aleatorio de 64 bits, según el OS del dispositivo.
+
 ### Método 2: SLAAC y DHCPv6 sin estado
 
+El mensaje **RA** sugiere que los dispositivos utilicen:
+
+- SLAAC para crear su propio IPv6 GUA.
+- La dirección de enlace local del Router; la dirección IPv6 de origen del RA para la dirección de la puerta de enlace predeterminada.
+- Un servidor DHCPv6 sin estado, que obtendrá otra información como la dirección del servidor DNS y el nombre de dominio.
+
+Un **Servidor DHCPv6** sin información de estado, distribuye las direcciones del **Servidor DNS** y los nombre de dominio. No asigna **GUA**.
+
 ### Método 3: DHCPv6 con estado (sin SLAAC)
+
+Una interfaz del Router, se puede configurar para enviar una **RA** usando **DHCPv6** con estado solamente.
+
+**DHCPv6 con información de estado** es similar a DHCP para IPv4.
+
+Un dispositivo puede recibir automáticamente su información de direccionamiento, inlcuida una **GUA**, la longitud del prefijo y las direcciones de los servidores DNS de un servidor DHCPv6 con estado.
+
+Con este Método, el mensaje **RA** sugiere que los dispositivos usen:
+
+- La dirección **LLA** del Router, que es la dirección IPv6 de origen del **RA**, para la dirección de la puerta de enlace predeterminada.
+- Un Servidor DHCPv6 con estado, para obtener una **GUA**, otra información como la dirección del servidor DNS y el nombre de dominio.
+
+Un **Servidor DHCPv6 con información de estado** asigna y mantiene una lista, de qué dispositivo recibe cuál dirección IPv6.
+
+La dirección de puerta de enlace predeterminada, solo se puede obtener dinámicamente a partir del mensaje RA. El servidor DHCPv6 con información de estado o sin ella no brinda la dirección de puerta de enlace predeterminada.
+
+### Proceso EUI-64
+
+Cuando el mensaje **RA** es **SLAAC** con **DHCPv6 sin estado**, el cliente debe generar su propia ID de interfaz. El cliente conoce la parte del **prefijo** de la dirección del mensaje **RA**, pero debe crear su propia ID de interfaz. El ID de la interfaz se puede crear utilizando el proceso EUI-64 o un número de 64 bits generado aleatoriamente.
+
+El proceso EUI-64 utiliza la dirección **MAC Ethernet de 48 bits** de un cliente e inserta otros 16 bits en el medio de la dirección MAC de 48 bits para crear una ID de interfaz de 64 bits.
+
+Las direcciones **MAC Ethernet**, se representa en formato hexadecimal y consta de dos partes:
+
+- Indentificador único de organización (OUI). El OUI es un código de proveedor de 24 bits (6 dígitos hexadecimales) que asigna el IEEE.
+- Identificación de dispositivos. El identificador de dispositivo es un valor único de 24 bits (6 dígitos hexadecimales) dentro de un OUI común.
+
+Las direcciones MAC Ethernet, por lo general, se representan en formato binario y constan de tres partes:
+
+- OUI de 24 bits de la dirección MAC del cliente, pero el 7th bit (bit universal/local, U7L) se invierte. Esto quiere decir que si el 7th bit es un 0, se transforma en un 1 y viceversa.
+- El valor insertado de 16 bits **fffe** en hexadecimal.
+- Identificador de dispositivo de 24 bits de la dirección MAC del cliente.
+
+El proceso **EUI-64** utiliza la dirección **MAC R1 GigabitEthernet** de **fc99:4775:cee0**.
+
+[EUI-64](imagenes/macr1gigaether.png)
+
+- Paso 1: dividir la dirección MAC entre el OUI y el identificador de dispositivo.
+- Paso 2: insertar el valor hexadecimal fffe, que en formato binario es 1111-1111-1111-1110.
+- Paso 3: convertir los primeros dos valores hexadecimales del OUI a binario e invertir el bit U/L (7th bit).
+- El resultado es un ID de interfaz generado por EUI-64 de: fe99:47ff:fe75:cee0.
+
+### ID de interfaz generados aleatoriamente
+
+Un dispositivo puede utilizar una ID de interfaz generada aleatoriamente en lugar de utilizar la dirección MAC y el proceso EUI-64. Windows utiliza una ID de interfaz generada aleatoriamente en lugar de una ID de interfaz creada mediante EUI-64.
+
+Una vez establecida la ID de la interfaz, ya sea a través del proceso EUI-64 o mediante la generación aleatoria, se puede combinar con un prefijo IPv6 en el mensaje RA para crear una GUA.
+
+Para garantizar la exclusividad de cualquier dirección de difusión de IPv6, el cliente puede usar un proceso denominado **detección de direcciones duplicadas (DAD)**. Es similar a una solicitud de **ARP** para su propia dirección. Si no se obtiene una respuesta, la dirección es única.
+
+## Direccionamiento dinámico para LLA IPv6
+
+### LLA dinámicos
+
+Todos los dispositivos deben tener una **LLA IPv6**. Al igual que **GUA IPv6** también puede crear **LLA** dinámicamente. Independientemente de cómo cree las **LLA**, es importante que verifique toda la configuración de direcciones IPv6.
+
+El **LLA** se crea dinámicamente usando el prefijo **fe80::/10** y la ID de interfaz usando el proceso EUI-64 o un número de 64 bits generado aleatoriamente.
+
+Los OS Windows, suelen utilizar el mismo Método, tanto para una **GUA** creada por **SLAAC** como para una **LLA** asignada dinámicamente.
+
+## Direcciones Multicast de IPv6
+
+### Direcciones IPv6 de multidifusión asignadas
