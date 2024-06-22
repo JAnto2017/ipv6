@@ -1,6 +1,6 @@
-# IPv6 Conceptos y Ejemplos
+# IPv6 Conceptos y Ejemplos (CISCO)
 
-- [IPv6 Conceptos y Ejemplos](#ipv6-conceptos-y-ejemplos)
+- [IPv6 Conceptos y Ejemplos (CISCO)](#ipv6-conceptos-y-ejemplos-cisco)
   - [Introducción al reenvío de Host](#introducción-al-reenvío-de-host)
     - [Visualizar tablas de enrutamiento de Host](#visualizar-tablas-de-enrutamiento-de-host)
     - [Enrutamiento Estático](#enrutamiento-estático)
@@ -30,6 +30,18 @@
     - [LLA dinámicos](#lla-dinámicos)
   - [Direcciones Multicast de IPv6](#direcciones-multicast-de-ipv6)
     - [Direcciones IPv6 de multidifusión asignadas](#direcciones-ipv6-de-multidifusión-asignadas)
+    - [Direcciones de multidifusión IPv6 bien conocidas](#direcciones-de-multidifusión-ipv6-bien-conocidas)
+    - [Direcciones IPv6 de multidifusión de nodo solicitado](#direcciones-ipv6-de-multidifusión-de-nodo-solicitado)
+  - [Resumen de direccionamiento IPv6](#resumen-de-direccionamiento-ipv6)
+    - [Tipos de direcciones IPv6](#tipos-de-direcciones-ipv6)
+    - [Configuración estática de GUA y LLA](#configuración-estática-de-gua-y-lla)
+    - [Direccionamiento dinámico de GUA y LLA](#direccionamiento-dinámico-de-gua-y-lla)
+    - [Direccionamiento dinámico para LLA de IPv6](#direccionamiento-dinámico-para-lla-de-ipv6)
+    - [Direcciones IPv6 de multidifusión](#direcciones-ipv6-de-multidifusión)
+  - [Introducción al descrubrimiento de vecinos IPv6](#introducción-al-descrubrimiento-de-vecinos-ipv6)
+  - [Operación de descubrimiento de vecinos](#operación-de-descubrimiento-de-vecinos)
+    - [Mensajes de descubrimiento de vecinos IPv6](#mensajes-de-descubrimiento-de-vecinos-ipv6)
+    - [Descrubrimiento de vecinos IPv6](#descrubrimiento-de-vecinos-ipv6)
 
 - - -
 
@@ -334,4 +346,132 @@ Los OS Windows, suelen utilizar el mismo Método, tanto para una **GUA** creada 
 
 ## Direcciones Multicast de IPv6
 
+Las direcciones **IPv6** de **multidifusión** son similares a las direcciones **IPv4** de **multidifusión**. Estas direcciones se utilizan para enviar un único paquete a uno o más destinos (grupo de multidifusión). Las direcciones de multidifusión IPv6 tienen el prefijo **ff00::/8**.
+
+Las direccioens de multidifusión solo pueden ser direcciones de destino y no direcciones de origen.
+
 ### Direcciones IPv6 de multidifusión asignadas
+
+Existen dos tipos de diercciones IPv6 de multidifusión:
+
+- Direcciones de multidifusión conocidas.
+- Direcciones de multidifusión de nodo solicitado.
+
+### Direcciones de multidifusión IPv6 bien conocidas
+
+Las direcciones de multidifusión asignadas se utilizan en contexto con protocolos específicos, como DHCPv6.
+
+Estos son dos grupos de multidifusión asignados por IPv6 comunes:
+
+- **FF02::1 Grupo multidifusión de todos los nodos**. Grupo multidifusión al que se unen todos los dispositivos con IPv6 habilitado. Los paquetes que se envían a este grupo son recibidos y procesados por todas las interfaces IPv6 en el enlace o en la red. Esto tiene el mismo efecto que una dirección de difusión en IPv4.
+- **FF02::2 Grupo multidifusión de todos los enrutadores**. Grupo multidifusión al que se unen todos los enrutadores con IPv6 habilitado. Un enrutador se convierte en un miembro de este grupo cuando se habilita como enrutador IPv6 mediante el comando de configuración global `ipv6 de difusión-enrutamiento`. Los paquetes que se envían a este grupo son recibidos y procesados por todos los enrutadores IPv6 en el enlace o en la red.
+
+Los dispositivos habilitados para IPv6 envían mensajes ICMPv6 RS a la dirección de multidifusión de todos los enrutadores. El mensaje RS solicita un mensaje RA del enrutador IPv6 para contribuir a la configuración de direcciones del dispositivo. El enrutador IPv6 responde con un mensaje RA.
+
+### Direcciones IPv6 de multidifusión de nodo solicitado
+
+Una **dirección multidifusión de nodo solicitado** es similar a una dirección multidifusión de todos los nodos.
+
+La ventaja de una **dirección multidifusión de nodo solicitado** es que asigna a una dirección especial de multidifusión de Ethernet. Esto permite que la NIC Ethernet filtre el marco al examinar la dirección MAC de destino sin enviarla al proceeeso de IPv6 para ver si el dispositivo es el objetivo previsto del paquete IPv6.
+
+## Resumen de direccionamiento IPv6
+
+### Tipos de direcciones IPv6
+
+Existen tres tipos de direcciones IPv6: **difusión**, **multidifusión** y de **difusión por proximidad**.
+
+IPv6 no utiliza la notación decimal punteada de máscara de subred. Al igual que IPv4, la longitud del prefijo se representa en notación de barra inclinada y se usa para indicar la porción de red de una dirección IPv6.
+
+Las direcciones IPv6 de difusión, identifican de forma exclusiva una interfaz en un dispositivo con IPv6 habilitado.
+
+Las **direcciones IPv6** suelen tener dos direcciones de **difusión**: **GUA** y **LLA**. Las direcciones locales únicas de IPv6 tienen los usos; para direcciones locales dentro de un sitio o entre un número limitado de sitios, se pueden usar para dispositivos que nuncan necesiten acceder a otra red y no se enrutan o traducen globalmente a una dirección IPv6 global.
+
+Las **direcciones IPv6 de difusión** **globales** **GUA** son globalmente únicas y enrutables en Internet IPv6. Son equivalentes a las direcciones IPv4 públicas. Un **GUA** tiene tres partes: un **prefijo de enrutamiento global**, un **Id. de subred** y un **Id. de interfaz**.
+
+Una **dirección local de enlace IPv6** **LLA** permite que un dispositivo se comunique con otros dispositivos habilitados para IPv6 en el mismo enlace y solo en ese enlace (subred). Los dispositivos pueden obtener un **LLA** de forma **estática** o **dinámica**.
+
+### Configuración estática de GUA y LLA
+
+El comando de Cisco para configurar una dirección **IPv4** en una interfaz es: `ip address ip-address subnet-mask`. Por el contrario, el comando para configurar una **GUA IPv6** en una interfaz es: `ipv6 address ipv6-address/prefix-length`.
+
+Al igual que con IPv4, la configuración de direcciones estáticas en clientes no se extiende a entornos más grandes. Por este motivo, la mayoría de los administradores de redes en una red IPv6 habilitan la asignación dinámica de direcciones IPv6.
+
+Configurar la **LLA** manualmente permite crear una dirección reconocible y más fácil de recordar. Por lo general, solo es necesario crear **LLA** reconocibles en los enrutadores. Las **LLA** se pueden configurar manualmente mediante el comando `ipv6 address ipv6-de-enlace-local-address` de enlace local.
+
+### Direccionamiento dinámico de GUA y LLA
+
+Un dispositivo obtiene una **GUA** dinámicamente a través de mensajes **ICMPv6**. Los Routers envían mensajes **RA** de **ICMPv6** periódicamente, cada 200 segundos a todos los dispositivos con **IPv6** habilitado en la red.
+
+También se enviará un mensaje **RA** en respuesta a un host que envía un mensaje **ICMPv6 RS**, que es una solicitud de un mensaje **RA**.
+
+El mensaje **ICMPv6** incluye: prefijo de red y longitud de prefijo, dirección de puerta de enlace predeterminada y direcciones **DNS** y nombre de dominio.
+
+Los mensajes **RA** tienen tres métodos: **SLAAC**, **SLAAC con un servidor DHCPv6 sin estado** y **DHCPv6 con estado (sin SLAAC)**.
+
+Con **SLAAC**, el dispositivo cliente utiliza la información del mensaje **RA** para crear su propio **GUA** porque el mensaje contiene el prefijo y el **ID** de interfaz.
+
+Con **SLAAC** y **DHCPv6 sin estado**, el mensaje **RA** sugiere que los dispositivos utilicen **SLAAC** para crear su propia **GUA IPv6**, utilizar la **LLA** del Router como dirección de puerta de enlace predeterminada y utilizar un servidor **DHCPv6** **sin estado** para obtener otra información necesaria.
+
+Con **DHCPv6 con estado**, **RA** suguiere  que los dispositivos utilicen el Router **LLA** como dirección de puerta de enlace predeterminada, y el servidor **DHCPv6** con estado para obtener una **GUA**, una dirección de servidor **DNS**, nombre de dominio y toda la información necesaria.
+
+La ID de interfaz se puede crear utilizando el proceso EUI-64 o un número de 64 bits generado aleatoriamente. El proceso EUI utiliza la dirección MAC Ethernet de 48 bits. Dependiendo del OS, un dispositivo puede usar una ID de interfaz generada aleatoriamente.
+
+### Direccionamiento dinámico para LLA de IPv6
+
+Todos los dispositivos **IPv6** deben tener una **LLA IPv6**. Una **LLA** se puede configurar manualmente o crear dinámicamente.
+
+Los OS como Windows, suelen utiliar el mismo Método, tanto para una **GUA** creada por **SLAAC** como para una **LLA** asignada dinámicamente.
+
+Los Routers Cisco crean automáticamente una **LLA IPv6** cada vez que se asigna una **GUA** a la interfaz. De manera predeterminada, los Routers Cisco IOS usan EUI-64 para generar la ID de interfaz para todos los LLA en las interfaces IPv6.
+
+Para las interfaces seriales, el Router utiliza la dirección MAC de una interfaz Ethernet. Para que sea más fácil reconocer y recordar estas direcciones en los Routers, es común configurar estáticamente los LLA de IPv6 en los Routers.
+
+Para verificar la configuración de la dirección IPv6, utilice los siguientes tres comandos: `show ipv6 interface brief`, `show ipv6 route` y `ping`.
+
+### Direcciones IPv6 de multidifusión
+
+Existen dos tipos de **direcciones multidifusión** de **IPv6**: **direcciones multidifusión conocidas** y **direcciones multidifusión de nodos solicitados**.
+
+Las direcciones de multidifusión asignadas son direcciones de multidifusión reservadas para grupos predeterminados de dispositivos. Se asignan direcciones multidifusión conocidas.
+
+Dos grupos multidifusión asignados por IPv6 comunes son: **FF02::1** grupo multidifusión de todos los nodos y **FF02::2** grupo multidifusión de todos los Routers.
+
+Una dirección multidifusión de nodo solicitado, es similar a una dirección multidifusión de todos los nodos. La ventaja de una dirección multidifusión de nodo solicitado es que se asigna a una dirección especial de multidifusión de Ethernet.
+
+## Introducción al descrubrimiento de vecinos IPv6
+
+| Títulos | Objetivos |
+| --- | --- |
+| Operación de descubrimiento de vecinos | Describir el funcionamiento de la detección de vecinos IPv6 |
+
+## Operación de descubrimiento de vecinos
+
+El **protocolo de detección de vecinos** o **ND** es lo que necesita para hacer coincidir las direcciones **IPv6** con las direcciones **MAC**.
+
+IPv6 no utiliza ARP, utiliza el protocolo ND para resolver direcciones MAC.
+
+ND proporciona servicios de resolución de direcciones, detección de enrutadores y redirección para IPv6 mediante ICMPv6.
+
+ICMPv6 ND utiliza cinco mensajes ICMPv6 para realizar estos servicios: solicitud de vecino, anuncio de vecino, solicitud de enrutador, anuncio de enrutador y redirección.
+
+Al igual que ARP para IPv4, los dispositivos IPv6 utilizan IPv6 ND para resolver la dirección MAC de un dispositivo en una dirección IPv6 conocida.
+
+### Mensajes de descubrimiento de vecinos IPv6
+
+**ND** proporciona servicios de resolución de direcciones, detección de enrutadores y redirección para **IPv6** mediante **ICMPv6**.
+
+**ICMPv6 ND** utiliza cinco mensajes **ICMPv6** para realizar estos servicios:
+
+- Mensajes de solicitud de vecinos.
+- Mensajes de anuncio de vecino.
+- Mensajes de solicitud del enrutador.
+- Mensajes de anuncio del enrutador.
+- Mensajes de redirección.
+
+El quinto mensaje **ICMPv6 ND** es un mensaje de redirección que se utiliza para una mejor selcción de siguiente salto.
+
+Los mensajes de **solicitud de vecino** y **anuncio de vecino** se utiliza para la mensajería de dispositivos, como la resolución de direcciones (similar a ARP para IPv4).
+
+Los mensajes de solicitud de enrutador y anuncio de enrutador, son para mensajes entre dispositivos y enrutadores. Normalmente, la detección de enrutadores se utiliza para la asignación dinámica de direcciones y la configuración automática de direcciones sin estado (SLAAC).
+
+### Descrubrimiento de vecinos IPv6
