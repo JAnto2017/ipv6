@@ -41,7 +41,8 @@
   - [Introducción al descrubrimiento de vecinos IPv6](#introducción-al-descrubrimiento-de-vecinos-ipv6)
   - [Operación de descubrimiento de vecinos](#operación-de-descubrimiento-de-vecinos)
     - [Mensajes de descubrimiento de vecinos IPv6](#mensajes-de-descubrimiento-de-vecinos-ipv6)
-    - [Descrubrimiento de vecinos IPv6](#descrubrimiento-de-vecinos-ipv6)
+    - [Descubrimiento de vecinos IPv6 - Resolución de direcciones](#descubrimiento-de-vecinos-ipv6---resolución-de-direcciones)
+      - [Resumen del Módulo](#resumen-del-módulo)
 
 - - -
 
@@ -474,4 +475,26 @@ Los mensajes de **solicitud de vecino** y **anuncio de vecino** se utiliza para 
 
 Los mensajes de solicitud de enrutador y anuncio de enrutador, son para mensajes entre dispositivos y enrutadores. Normalmente, la detección de enrutadores se utiliza para la asignación dinámica de direcciones y la configuración automática de direcciones sin estado (SLAAC).
 
-### Descrubrimiento de vecinos IPv6
+### Descubrimiento de vecinos IPv6 - Resolución de direcciones
+
+Al igual que ARP para IPv4, los dispositivos IPv6 utilizan **IPv6 ND** para determinar la dirección **MAC** de un dispositivo que tiene una dirección **IPv6** conocida.
+
+Los mensajes **ICMPv6 Solicitud de vecino** y **Anuncio de vecino**, se utilizan para la resolución de la dirección **MAC**.
+
+Es similar a las solicitudes ARP en IPv4. Por ejemplo, supongamos que *PC1* desea hacer `ping` a PC2 en la dirección **IPv6 2001:db8:acad::1**. Para determinar la dirección **MAC** de la dirección **IPv6** conocida, *PC1* envía un mensaje de solicitud de vecino **ICMPv6**.
+
+![Descubrimiento de vecinos](../ipv6/imagenes/descubrvecinipv6.png)
+
+Los mensajes de solicitud de vecinos **ICMPv6** se envian utilizando direcciones **multidifusión** Ethernet e **IPv6** especiales. Esto permite que la **NIC Ethernet** del dispositivo receptor determine si el mensaje de solicitud de vecino es para sí mismo, sin tener que enviarlo al OS para su procesamiento.
+
+*PC2* responde a la solicitud con un mensaje **ICMPv6** Anuncio vecino que incluye su dirección **MAC**.
+
+#### Resumen del Módulo
+
+**IPv6** no utiliza **ARP**, utiliza el protocolo **ND** para resolver direcciones **MAC**.
+
+**ND** proporciona servicios de resolución de direcciones, detección de enrutadores y redirección para **IPv6** mediante **ICMPv6**.
+
+**ICMPv6** **ND** utiliza cinco mensajes **ICMPv6** para realizar estos servicios: solicitud de vecino, anuncio de vecino, solicitud de enrutador, anuncio de enrutador y redirección.
+
+Al igual que **ARP** para **IPv4**, los dispositivos **IPv6** utilizan **IPv6** **ND** para resolver la dirección **MAC** de un dispositivo en una dirección **IPv6** conocida.
